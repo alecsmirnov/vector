@@ -1,63 +1,49 @@
 ﻿#ifndef VECTOR_H
 #define VECTOR_H
 
-#include <stdio.h>
-#include <malloc.h>
+#include <stddef.h>
+#include <stdbool.h>
 
-/* C++ std::vector standard Grown factor */
-#define GROWN_FACTOR 1.5					
+typedef enum VectorError {
+	OK_STATUS,
+	NULLPTR_ERROR,
+	ELEM_SIZE_ERROR,
+	INDEX_OUT_OF_BOUND_ERROR
+} VectorError;
 
-/* vector typename creator: */
-#define createType(type) vector##_##type	
+typedef struct Vector {
+	size_t size;
+	size_t capacity;
+	size_t elem_size;
 
+	void* data;
+} Vector;
 
-/* Vector declaration keyword */
-#define declareVectorType(type)	typedef struct createType(type) {				\
-	type* data;																	\
-																				\
-	size_t size;																\
-	size_t capacity;															\
-} createType(type);																\
-																				\
-/* Vector initialization method */												\
-void initVector_##type(createType(type)* V, size_t capacity) {					\
-	V->size = 0;																\
-	V->capacity = capacity;														\
-																				\
-	V->data = V->capacity ? (type*)malloc(sizeof(type) * V->capacity) : NULL;	\
-}																				\
-																				\
-/* Vector free method */														\
-void freeVector_##type(createType(type)* V) {									\
-	V->size = V->capacity = 0;													\
-																				\
-	free(V->data);																\
-	V->data = NULL;																\
-}																				\
-																				\
-/* Vector push back method */													\
-void pushBackVector_##type(createType(type)* V, type value) {					\
-	if (V->size == V->capacity) {												\
-		V->capacity = (size_t)(V->capacity * GROWN_FACTOR);						\
-																				\
-		if (V->size == V->capacity)												\
-			++V->capacity;														\
-																				\
-		V->data = (type*)realloc(V->data, sizeof(type) * V->capacity);			\
-	}																			\
-																				\
-	V->data[V->size++] = value;													\
-}																				\
-																				\
-/* Vector resize method */														\
-void resizeVector_##type(createType(type)* V, size_t capacity) {				\
-	if (0 < capacity) {															\
-		V->capacity = capacity;													\
-																				\
-		V->data = (type*)realloc(V->data, sizeof(type) * V->capacity);			\
-	}																			\
-	else																		\
-		freeVector_##type(V);													\
-}
+/* Initializers */
+VectorError vectorInit(Vector* V, size_t elem_size, size_t capacity);
+VectorError vectorInitAssign(Vector* V, size_t elem_size, size_t count, void* elem);
+
+/* Modifiers */
+VectorError vectorAssign(Vector* V, size_t count, void* elem);
+VectorError vectorCopy(Vector* V_dest, const Vector* V_src);
+VectorError vectorSwap(Vector* V_a, Vector* V_b);
+
+VectorError vectorPushBack(Vector* V, void* elem);
+VectorError vectorPushFront(Vector* V, void* elem);
+VectorError vectorInsert(Vector* V, size_t elem_index, void* elem);
+
+VectorError vectorPopBack(Vector* V);
+VectorError vectorPopFront(Vector* V);
+VectorError vectorErase(Vector* V, size_t elem_index);
+
+VectorError vectorResize(Vector* V, size_t new_size);
+VectorError vectorClear(Vector* V);
+
+/* Capacity */
+bool vectorIsEmpty(const Vector* V);
+VectorError vectorShrinkToFit(Vector* V);
+
+/* Element access */
+void* vectorAt(Vector* V, size_t elem_index);
 
 #endif
