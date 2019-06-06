@@ -9,9 +9,6 @@
 
 #define CAPACITY_MIN 1
 
-#define VECTOR_BEGIN 0
-#define VECTOR_END   V->size
-
 #define EMPTY_VECTOR { 0, 0, 0, NULL };
 
 static void initCapacity(Vector* V) {
@@ -54,11 +51,11 @@ static void dataLeftOffset(Vector* V, size_t offset) {
 	--V->size;
 }
 
-VectorError vectorInit(Vector* V, size_t elem_size, size_t capacity) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorInit(Vector* V, size_t elem_size, size_t capacity) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V) {
-		error = ELEM_SIZE_ERROR;
+		error = ERROR_ELEM_SIZE;
 
 		if (elem_size) {
 			V->size = 0;
@@ -67,17 +64,17 @@ VectorError vectorInit(Vector* V, size_t elem_size, size_t capacity) {
 
 			V->data = V->capacity ? malloc(V->capacity * V->elem_size) : NULL;
 
-			error = OK_STATUS;
+			error = ERROR_OK_STATUS;
 		}
 	}
 
 	return error;
 }
 
-VectorError vectorInitAssign(Vector* V, size_t elem_size, size_t count, void* elem) {
-	VectorError error = vectorInit(V, elem_size, count);
+ERROR vectorInitAssign(Vector* V, size_t elem_size, size_t count, void* elem) {
+	ERROR error = vectorInit(V, elem_size, count);
 
-	if (error == OK_STATUS && elem) {
+	if (error == ERROR_OK_STATUS && elem) {
 		V->size = count;
 
 		for (size_t i = 0; i != V->size; ++i)
@@ -87,18 +84,18 @@ VectorError vectorInitAssign(Vector* V, size_t elem_size, size_t count, void* el
 	return error;
 }
 
-VectorError vectorAssign(Vector* V, size_t count, void* elem) {
+ERROR vectorAssign(Vector* V, size_t count, void* elem) {
 	size_t V_elem_size = V->elem_size;
-	VectorError error = vectorClear(V);
+	ERROR error = vectorClear(V);
 
-	if (error == OK_STATUS)
+	if (error == ERROR_OK_STATUS)
 		error = vectorInitAssign(V, V_elem_size, count, elem);
 
 	return error;
 }
 
-VectorError vectorCopy(Vector* V_dest, const Vector* V_src) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorCopy(Vector* V_dest, const Vector* V_src) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V_src && V_dest) {
 		V_dest->size = V_src->size;
@@ -110,14 +107,14 @@ VectorError vectorCopy(Vector* V_dest, const Vector* V_src) {
 		V_dest->data = malloc(V_dest->capacity * V_dest->elem_size);
 		memcpy(V_dest->data, V_src->data, V_dest->capacity * V_dest->elem_size);
 
-		error = OK_STATUS;
+		error = ERROR_OK_STATUS;
 	}
 
 	return error;
 }
 
-VectorError vectorSwap(Vector* V_a, Vector* V_b) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorSwap(Vector* V_a, Vector* V_b) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V_a && V_b) {
 		Vector tmp = EMPTY_VECTOR;
@@ -127,56 +124,56 @@ VectorError vectorSwap(Vector* V_a, Vector* V_b) {
 		vectorCopy(V_b, &tmp);
 		vectorClear(&tmp);
 
-		error = OK_STATUS;
+		error = ERROR_OK_STATUS;
 	}
 
 	return error;
 }
 
-VectorError vectorPushBack(Vector* V, void* elem) {
-	return vectorInsert(V, VECTOR_END, elem);
+ERROR vectorPushBack(Vector* V, void* elem) {
+	return vectorInsert(V, V->size, elem);
 }
 
-VectorError vectorPushFront(Vector* V, void* elem) {
-	return vectorInsert(V, VECTOR_BEGIN, elem);
+ERROR vectorPushFront(Vector* V, void* elem) {
+	return vectorInsert(V, 0, elem);
 }
 
-VectorError vectorInsert(Vector* V, size_t elem_index, void* elem) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorInsert(Vector* V, size_t elem_index, void* elem) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V) {
-		error = INDEX_OUT_OF_BOUND_ERROR;
+		error = ERROR_INDEX_OUT_OF_BOUND;
 
 		if (vectorIsEmpty(V) || elem_index <= V->size) {
 			dataExpand(V);
 			dataRightOffset(V, elem_index);
 			memcpy(dataAccess(V, elem_index), elem, V->elem_size);
 
-			error = OK_STATUS;
+			error = ERROR_OK_STATUS;
 		}
 	}
 
 	return error;
 }
 
-VectorError vectorPopBack(Vector* V) {
-	return vectorErase(V, VECTOR_END - 1);
+ERROR vectorPopBack(Vector* V) {
+	return vectorErase(V, V->size - 1);
 }
 
-VectorError vectorPopFront(Vector* V) {
-	return vectorErase(V, VECTOR_BEGIN);
+ERROR vectorPopFront(Vector* V) {
+	return vectorErase(V, 0);
 }
 
-VectorError vectorErase(Vector* V, size_t elem_index) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorErase(Vector* V, size_t elem_index) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V) {
-		error = INDEX_OUT_OF_BOUND_ERROR;
+		error = ERROR_INDEX_OUT_OF_BOUND;
 
 		if (elem_index < V->size) {
 			dataLeftOffset(V, elem_index);
 
-			error = OK_STATUS;
+			error = ERROR_OK_STATUS;
 		}
 	}
 
@@ -189,8 +186,8 @@ bool vectorIsEmpty(const Vector* V) {
 	return V->data == NULL;
 }
 
-VectorError vectorShrinkToFit(Vector* V) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorShrinkToFit(Vector* V) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V) {
 		void* new_data = malloc(V->size * V->elem_size);
@@ -201,17 +198,17 @@ VectorError vectorShrinkToFit(Vector* V) {
 		V->capacity = V->size;
 		V->data = new_data;
 
-		error = OK_STATUS;
+		error = ERROR_OK_STATUS;
 	}
 
 	return error;
 }
 
-VectorError vectorResize(Vector* V, size_t new_size) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorResize(Vector* V, size_t new_size) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V) {
-		if (V->capacity <= new_size) {
+		if (V->capacity < new_size) {
 			void* new_data = new_size ? malloc(new_size * V->elem_size) : NULL;
 
 			memcpy(new_data, V->data, new_size * V->elem_size);
@@ -224,14 +221,14 @@ VectorError vectorResize(Vector* V, size_t new_size) {
 		else
 			V->size = new_size;
 
-		error = OK_STATUS;
+		error = ERROR_OK_STATUS;
 	}
 
 	return error;
 }
 
-VectorError vectorClear(Vector* V) {
-	VectorError error = NULLPTR_ERROR;
+ERROR vectorClear(Vector* V) {
+	ERROR error = ERROR_NULLPTR;
 
 	if (V) {
 		V->size = 0;
@@ -241,7 +238,7 @@ VectorError vectorClear(Vector* V) {
 		free(V->data);
 		V->data = NULL;
 
-		error = OK_STATUS;
+		error = ERROR_OK_STATUS;
 	}
 
 	return error;
