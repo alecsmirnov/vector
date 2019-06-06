@@ -211,14 +211,18 @@ VectorError vectorResize(Vector* V, size_t new_size) {
 	VectorError error = NULLPTR_ERROR;
 
 	if (V) {
-		void* new_data = new_size ? malloc(new_size * V->elem_size) : NULL;
+		if (V->capacity <= new_size) {
+			void* new_data = new_size ? malloc(new_size * V->elem_size) : NULL;
 
-		memcpy(new_data, V->data, new_size * V->elem_size);
-		free(V->data);
+			memcpy(new_data, V->data, new_size * V->elem_size);
+			free(V->data);
 
-		V->size = new_size;
-		V->capacity = new_size;
-		V->data = new_data;
+			V->size = new_size;
+			V->capacity = new_size;
+			V->data = new_data;
+		}
+		else
+			V->size = new_size;
 
 		error = OK_STATUS;
 	}
