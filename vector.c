@@ -122,9 +122,9 @@ VectorError vectorSwap(Vector* V_a, Vector* V_b) {
 	if (V_a && V_b) {
 		Vector tmp = EMPTY_VECTOR;
 
-		vectorCopy(V_a,  &tmp);
-		vectorCopy(V_b,  V_a);
-		vectorCopy(&tmp, V_b);
+		vectorCopy(&tmp, V_a);
+		vectorCopy(V_a, V_b);
+		vectorCopy(V_b, &tmp);
 		vectorClear(&tmp);
 
 		error = OK_STATUS;
